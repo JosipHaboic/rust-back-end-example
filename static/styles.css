@@ -1,0 +1,12 @@
+html {
+    font-family: 'Saira', sans-serif;
+}
+
+body {
+    background: #effeef;
+}
+
+.container {
+    display: flex;
+    justify-content: center;;
+}
