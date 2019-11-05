@@ -23,7 +23,9 @@ pub struct AppState<'a> {
 impl<'a> AppState<'a> {
     pub fn new() -> AppState<'a> {
         AppState {
-            db: DatabaseState::new(Mutex::new(Connection::open_in_memory().unwrap())),
+            db: DatabaseState::new(Mutex::new(
+                Connection::open_in_memory().unwrap(),
+            )),
         }
     }
 }

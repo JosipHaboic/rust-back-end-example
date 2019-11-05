@@ -77,8 +77,7 @@ impl<'a> TableGateway<'a> for UserTableGateway<'a> {
                 password: row.get(2).unwrap(),
                 created_at: row.get(3).unwrap(),
             })
-        })
-        {
+        }) {
             Ok(user) => Some(user),
             Err(_) => None,
         }
@@ -109,7 +108,7 @@ impl<'a> TableGateway<'a> for UserTableGateway<'a> {
 }
 
 // this should be done in a different way, by making more smart "find" method
-impl <'a> UserTableGateway <'a> {
+impl<'a> UserTableGateway<'a> {
     pub fn find_all(self: &Self) -> Option<Vec<User>> {
         let connection = self.connection.lock().unwrap();
         let mut sql_statement = connection
@@ -124,7 +123,7 @@ impl <'a> UserTableGateway <'a> {
                 created_at: row.get(3).unwrap(),
             })
         }) {
-            Ok(result) =>  {
+            Ok(result) => {
                 let mut users: Vec<User> = Vec::new();
 
                 for i in result {
@@ -134,8 +133,8 @@ impl <'a> UserTableGateway <'a> {
                 }
 
                 Some(users)
-            },
-            Err(_) => None
+            }
+            Err(_) => None,
         }
     }
 }
