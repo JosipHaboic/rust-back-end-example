@@ -31,15 +31,14 @@ fn main() {
             // enable logger
             .wrap(middleware::Logger::default())
             .register_data(web::Data::new(store::state::AppState::new()))
-            // .service(web::scope("/api").route("/", web::get().to(handlers::api::index)))
+            .service(
+                web::scope("/users")
+                    .route("/", web::get().to(handlers::user::get_user_list)),
+            )
             .service(
                 // static files
                 fs::Files::new("/", "./static/").index_file("index.html"),
             )
-        // .service(
-        //     web::scope("/async")
-        //     .route("/", web::to_async(handlers::message::index))
-        // )
     });
 
     let mut listenfd = ListenFd::from_env();

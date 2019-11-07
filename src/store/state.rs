@@ -4,27 +4,27 @@ use crate::gateways::user::UserTableGateway;
 use rusqlite::Connection;
 use std::sync::Mutex;
 
-pub struct DatabaseState<'a> {
-    pub user_table_gateway: UserTableGateway<'a>,
+pub struct DatabaseState {
+    pub user_table_gateway: UserTableGateway,
 }
 
-impl<'a> DatabaseState<'a> {
-    pub fn new(connection: Mutex<Connection>) -> DatabaseState<'a> {
+impl<'a> DatabaseState {
+    pub fn new(connection: Mutex<Connection>) -> DatabaseState {
         DatabaseState {
-            user_table_gateway: UserTableGateway::init(&connection),
+            user_table_gateway: UserTableGateway::init(connection),
         }
     }
 }
 
-pub struct AppState<'a> {
-    pub db: DatabaseState<'a>,
+pub struct AppState {
+    pub db: DatabaseState,
 }
 
-impl<'a> AppState<'a> {
-    pub fn new() -> AppState<'a> {
+impl AppState {
+    pub fn new() -> AppState {
         AppState {
             db: DatabaseState::new(Mutex::new(
-                Connection::open_in_memory().unwrap(),
+                Connection::open("./database.db").unwrap(),
             )),
         }
     }

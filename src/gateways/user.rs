@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::core::traits::base::{Entity, Gateway};
 use crate::core::traits::data_source::TableGateway;
 use crate::core::traits::object_relational::structural::IdentityField;
@@ -18,27 +19,28 @@ impl IdentityField for User {
     }
 }
 
-pub struct UserTableGateway<'a> {
-    connection: &'a Mutex<Connection>,
+pub struct UserTableGateway {
+    connection: Mutex<Connection>,
 }
 
-impl<'a> Gateway<'a> for UserTableGateway<'a> {
+impl Gateway for UserTableGateway {
     type Connection = Mutex<Connection>;
 
-    fn init(connection: &'a Self::Connection) -> UserTableGateway<'a> {
+    fn init(connection: Self::Connection) -> UserTableGateway {
         UserTableGateway { connection }
     }
 }
 
-impl<'a> TableGateway<'a> for UserTableGateway<'a> {
+impl TableGateway for UserTableGateway {
     type Model = User;
-    type Params = Params<'a>;
+    type Params = Params;
 
     fn create_table(self: &Self) -> bool {
         self.connection
             .lock()
             .unwrap()
-            .execute(include_str!("../sql/user/create_table.sql"), NO_PARAMS)
+            .execute_batch(
+                include_str!("../sql/user/create_table.sql"))
             .is_ok()
     }
 
@@ -46,7 +48,7 @@ impl<'a> TableGateway<'a> for UserTableGateway<'a> {
         self.connection
             .lock()
             .unwrap()
-            .execute(include_str!("../sql/user/drop_table.sql"), NO_PARAMS)
+            .execute_batch(include_str!("../sql/user/drop_table.sql"))
             .is_ok()
     }
 
@@ -75,7 +77,7 @@ impl<'a> TableGateway<'a> for UserTableGateway<'a> {
                 uuid: row.get(0).unwrap(),
                 username: row.get(1).unwrap(),
                 password: row.get(2).unwrap(),
-                created_at: row.get(3).unwrap(),
+                inserted_at: Some(row.get(3).unwrap()),
             })
         }) {
             Ok(user) => Some(user),
@@ -108,21 +110,22 @@ impl<'a> TableGateway<'a> for UserTableGateway<'a> {
 }
 
 // this should be done in a different way, by making more smart "find" method
-impl<'a> UserTableGateway<'a> {
+impl<'a> UserTableGateway {
     pub fn find_all(self: &Self) -> Option<Vec<User>> {
-        let connection = self.connection.lock().unwrap();
-        let mut sql_statement = connection
+        match self
+            .connection
+            .lock()
+            .unwrap()
             .prepare(include_str!("../sql/user/find_all.sql"))
-            .unwrap();
-
-        match sql_statement.query_map(NO_PARAMS, |row| {
-            Ok(User {
-                uuid: row.get(0).unwrap(),
-                username: row.get(1).unwrap(),
-                password: row.get(2).unwrap(),
-                created_at: row.get(3).unwrap(),
-            })
-        }) {
+            .unwrap()
+            .query_map(NO_PARAMS, |row| {
+                Ok(User {
+                    uuid: row.get(0).unwrap(),
+                    username: row.get(1).unwrap(),
+                    password: row.get(2).unwrap(),
+                    inserted_at: Some(row.get(3).unwrap()),
+                })
+            }) {
             Ok(result) => {
                 let mut users: Vec<User> = Vec::new();
 
@@ -148,36 +151,30 @@ mod tests {
     fn test_user_gateway() {
         let connection = Mutex::new(Connection::open_in_memory().unwrap());
 
-        let user_gateway = UserTableGateway::init(&connection);
+        let user_gateway = UserTableGateway::init(connection);
         assert!(user_gateway.create_table());
 
         let mut insert_params = Params::new();
 
         let user = User::new("Josip".to_owned(), "1q2w3e4r".to_owned());
 
-        insert_params.insert("username", Value::Text(user.username));
-        insert_params.insert("password", Value::Text(user.password));
-        insert_params.insert("uuid", Value::Text(user.uuid));
+        insert_params.insert("username".to_owned(), Value::Text(user.username));
+        insert_params.insert("password".to_owned(), Value::Text(user.password));
+        insert_params.insert("uuid".to_owned(), Value::Text(user.uuid));
 
         assert!(user_gateway.insert(&insert_params));
 
-        let id: String = connection
-            .lock()
-            .unwrap()
-            .query_row("SELECT uuid FROM users;", NO_PARAMS, |row| {
-                Ok(row.get(0).unwrap())
-            })
-            .unwrap();
+        let users = user_gateway.find_all();
 
-        assert!(id.len() > 0);
+        if let Some(user_list) = users {
+            assert_eq!(user_list.capacity(), 1);
+            let user = user_gateway.find(&user_list[0].uuid);
 
-        match user_gateway.find(&id) {
-            Some(user) => {
-                assert_eq!(user.id(), &id);
-                assert_eq!(user.username, "Josip".to_owned());
-                assert_eq!(user.password, "1q2w3e4r".to_owned());
+            if let Some(usr) = user {
+                assert_eq!(usr.uuid, user_list[0].uuid);
+                assert_eq!(usr.username, user_list[0].username);
+                assert_eq!(usr.password, user_list[0].password);
             }
-            None => assert!(false),
         }
     }
 }

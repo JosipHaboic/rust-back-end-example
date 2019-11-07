@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-use crate::utils::timestamp;
 use rs_uuid::uuid16;
 use serde_derive::{Deserialize, Serialize};
 
@@ -8,7 +7,7 @@ pub struct User {
     pub uuid: String,
     pub username: String,
     pub password: String,
-    pub created_at: String,
+    pub inserted_at: Option<String>,
 }
 
 impl User {
@@ -17,7 +16,7 @@ impl User {
             uuid: uuid16(),
             username,
             password,
-            created_at: timestamp(),
+            inserted_at: None,
         }
     }
 }

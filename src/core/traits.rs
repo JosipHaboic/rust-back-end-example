@@ -5,10 +5,10 @@ pub mod base {
 
     /// Gateway
     /// An object that encapsulates access to an external system or resource
-    pub trait Gateway<'a> {
+    pub trait Gateway {
         type Connection;
 
-        fn init(connection: &'a Self::Connection) -> Self;
+        fn init(connection: Self::Connection) -> Self;
     }
 }
 
@@ -40,7 +40,7 @@ pub mod data_source {
     /// Table Gateway
     /// An object that acts as a Gateway (466) to a database table.
     /// One instance handles all the rows in the table.
-    pub trait TableGateway<'a>: Gateway<'a> {
+    pub trait TableGateway: Gateway {
         type Model;
         type Params;
 
