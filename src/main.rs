@@ -3,10 +3,13 @@ use actix_web::{middleware, web, App, HttpServer};
 use env_logger;
 use listenfd::ListenFd;
 use log::info;
+use rusqlite::Connection;
+use std::include_str;
 
 mod core;
 mod gateways;
 mod handlers;
+mod inputs;
 mod models;
 mod responders;
 mod store;
@@ -25,6 +28,12 @@ fn main() {
         ADDRESS, PORT
     );
 
+    let connection = Connection::open("./database.db").unwrap();
+    connection
+        .execute_batch(include_str!("./sql/user/__create__.sql"))
+        .unwrap();
+    connection.close().unwrap();
+
     let mut server = HttpServer::new(move || {
         // move state into the closure
         App::new()
@@ -32,8 +41,17 @@ fn main() {
             .wrap(middleware::Logger::default())
             .register_data(web::Data::new(store::state::AppState::new()))
             .service(
-                web::scope("/users")
-                    .route("/", web::get().to(handlers::user::get_user_list)),
+                web::resource("/users")
+                    .name("users")
+                    .route(web::get().to(handlers::user::get_user_list))
+                    .route(web::post().to(handlers::user::create_user)),
+            )
+            .service(
+                web::resource("/users/{id}")
+                    .name("user")
+                    .route(web::get().to(handlers::user::get_user))
+                    .route(web::put().to(handlers::user::update_user))
+                    .route(web::delete().to(handlers::user::delete_user)),
             )
             .service(
                 // static files

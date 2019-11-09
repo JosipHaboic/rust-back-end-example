@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
   CHECK(length(password) >= 8)
 );
 
-CREATE INDEX idx_user_uuid ON users(uuid);
+CREATE INDEX IF NOT EXISTS idx_user_uuid ON users(uuid);
 
 CREATE TABLE  IF NOT EXISTS users_history (
   uuid INTEGER NOT NULL,
@@ -41,7 +41,7 @@ CREATE TRIGGER IF NOT EXISTS track_user_deletes
 AFTER DELETE ON users
 BEGIN
   INSERT INTO users_history (user_uuid, action_type) VALUES (
-    new.uuid,
+    old.uuid,
     'DELETE'
   );
 END;

@@ -9,7 +9,15 @@
 </head>
 <body>
     <div class="container">
-        <h1>Hello</h1>
+        <form action="/users" method="POST">
+            <label for="username">username</label>
+            <input type="text" name="username" />
+
+            <label for="password"></label>
+            <input type="password" name="password" />
+
+            <button type="submit">create user</button>
+        </form>
     </div>
 </body>
 

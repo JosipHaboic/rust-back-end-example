@@ -1,18 +1,14 @@
-#![allow(dead_code)]
-use crate::core::traits::base::Gateway;
-use crate::gateways::user::UserTableGateway;
+// #![allow(dead_code)]
 use rusqlite::Connection;
 use std::sync::Mutex;
 
 pub struct DatabaseState {
-    pub user_table_gateway: UserTableGateway,
+    pub connection: Mutex<Connection>,
 }
 
 impl<'a> DatabaseState {
     pub fn new(connection: Mutex<Connection>) -> DatabaseState {
-        DatabaseState {
-            user_table_gateway: UserTableGateway::init(connection),
-        }
+        DatabaseState { connection }
     }
 }
 
