@@ -10,13 +10,20 @@
 <body>
     <div class="container">
         <form action="/api/v1/users" method="POST">
-            <label for="username">username</label>
-            <input type="text" name="username" />
 
-            <label for="password"></label>
-            <input type="password" name="password" />
+            <div class="field">
+                <label htmlFor="username">username</label>
+                <input type="text" name="username" />
+            </div>
 
-            <button type="submit">create user</button>
+            <div class="field">
+                <label htmlFor="password">password</label>
+                <input type="password" name="password" />
+            </div>
+
+            <div class="field">
+                <button type="submit">create user</button>
+            </div>
         </form>
     </div>
 </body>

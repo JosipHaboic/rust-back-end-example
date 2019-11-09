@@ -46,14 +46,14 @@ pub fn create_user(
     if user_gateway.insert(&p) {
         HttpResponse::Ok().json(
             r#"{
-                status: \"Ok\",
-                message: \"user is inserted\"
+                status: "Ok",
+                message: "user is inserted"
             }"#)
     } else {
         HttpResponse::Ok().json(
             r#"{
-                status: \"Error\",
-                message: \"user is not inserted\"
+                status: "Error",
+                message: "user is not inserted"
             }"#,
         )
     }
@@ -75,15 +75,15 @@ pub fn update_user(
     if user_gateway.update(&p) {
         HttpResponse::Ok().json(
             r#"{
-                status: \"Ok\",
-                message: \"user is updated\"
+                status: "Ok",
+                message: "user is updated"
             }"#
         )
     } else {
         HttpResponse::Ok().json(
             r#"{
-                status: \"Error\",
-                message: \"user is not updated\"
+                status: "Error",
+                message: "user is not updated"
             }"#
         )
     }
@@ -99,15 +99,15 @@ pub fn delete_user(
     if user_gateway.delete(&path.0) {
         HttpResponse::Ok().json(
             r#"{
-                status: \"Ok\",
-                message: \"user is deleted\"
+                status: "Ok",
+                message: "user is deleted"
             }"#
         )
     } else {
         HttpResponse::Ok().json(
             r#"{
-                status: \"Error\",
-                message: \"user is not deleted\"
+                status: "Error",
+                message: "user is not deleted"
             }"#
         )
     }
