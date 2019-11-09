@@ -13,12 +13,14 @@ impl<'a> DatabaseState {
 }
 
 pub struct AppState {
+    pub version: u8,
     pub db: DatabaseState,
 }
 
 impl AppState {
-    pub fn new() -> AppState {
+    pub fn new(version: u8) -> AppState {
         AppState {
+            version,
             db: DatabaseState::new(Mutex::new(
                 Connection::open("./database.db").unwrap(),
             )),

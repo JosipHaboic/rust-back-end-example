@@ -21,6 +21,7 @@ fn main() {
 
     const ADDRESS: &str = "127.0.0.1";
     const PORT: u16 = 8080;
+    const API_VERSION: u8 = 1;
 
     println!("Starting application on: http://{}:{}", ADDRESS, PORT);
     info!(
@@ -39,19 +40,24 @@ fn main() {
         App::new()
             // enable logger
             .wrap(middleware::Logger::default())
-            .register_data(web::Data::new(store::state::AppState::new()))
-            .service(
-                web::resource("/users")
-                    .name("users")
-                    .route(web::get().to(handlers::user::get_user_list))
-                    .route(web::post().to(handlers::user::create_user)),
-            )
-            .service(
-                web::resource("/users/{id}")
-                    .name("user")
-                    .route(web::get().to(handlers::user::get_user))
-                    .route(web::put().to(handlers::user::update_user))
-                    .route(web::delete().to(handlers::user::delete_user)),
+            .register_data(
+                web::Data::new(store::state::AppState::new(API_VERSION))
+            ).service(
+                web::scope(&format!("api/v{}", API_VERSION))
+                .service(
+                    web::resource("/users")
+                        .name("users")
+                        .route(web::get().to(handlers::user::get_user_list))
+                        .route(web::post().to(handlers::user::create_user)),
+                )
+                .service(
+                    web::resource("/users/{id}")
+                        .name("user")
+                        .route(web::get().to(handlers::user::get_user))
+                        .route(web::put().to(handlers::user::update_user))
+                        .route(web::delete().to(handlers::user::delete_user)),
+                )
+
             )
             .service(
                 // static files

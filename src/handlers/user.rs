@@ -13,12 +13,8 @@ pub fn get_user_list(data: web::Data<AppState>) -> HttpResponse {
     let user_gateway = UserTableGateway::init(&connection);
 
     match user_gateway.find_all() {
-        Some(users) => {
-            HttpResponse::Ok().json(users)
-        }
-        None => {
-            HttpResponse::Ok().json(())
-        }
+        Some(users) => HttpResponse::Ok().json(users),
+        None => HttpResponse::Ok().json(()),
     }
 }
 
@@ -30,12 +26,8 @@ pub fn get_user(
     let user_gateway = UserTableGateway::init(&connection);
 
     match user_gateway.find(&path.0) {
-        Some(user) => {
-            HttpResponse::Ok().json(user)
-        }
-        None => {
-            HttpResponse::Ok().json(())
-        }
+        Some(user) => HttpResponse::Ok().json(user),
+        None => HttpResponse::Ok().json(()),
     }
 }
 
@@ -51,17 +43,19 @@ pub fn create_user(
     p.insert("username".to_owned(), Value::Text(form.username.clone()));
     p.insert("password".to_owned(), Value::Text(form.password.clone()));
 
-    match user_gateway.insert(&p) {
-        true => HttpResponse::Ok()
-            .json("{
+    if user_gateway.insert(&p) {
+        HttpResponse::Ok().json(
+            r#"{
                 status: \"Ok\",
                 message: \"user is inserted\"
-            }"),
-        false => HttpResponse::Ok()
-            .json("{
+            }"#)
+    } else {
+        HttpResponse::Ok().json(
+            r#"{
                 status: \"Error\",
                 message: \"user is not inserted\"
-            }"),
+            }"#,
+        )
     }
 }
 
@@ -78,17 +72,20 @@ pub fn update_user(
     p.insert("username".to_owned(), Value::Text(form.username.clone()));
     p.insert("password".to_owned(), Value::Text(form.password.clone()));
 
-    match user_gateway.update(&p) {
-        true => HttpResponse::Ok()
-            .json("{
+    if user_gateway.update(&p) {
+        HttpResponse::Ok().json(
+            r#"{
                 status: \"Ok\",
                 message: \"user is updated\"
-            }"),
-        false => HttpResponse::Ok()
-            .json("{
+            }"#
+        )
+    } else {
+        HttpResponse::Ok().json(
+            r#"{
                 status: \"Error\",
                 message: \"user is not updated\"
-            }"),
+            }"#
+        )
     }
 }
 
@@ -99,16 +96,19 @@ pub fn delete_user(
     let connection = data.db.connection.lock().unwrap();
     let user_gateway = UserTableGateway::init(&connection);
 
-    match user_gateway.delete(&path.0) {
-        true => HttpResponse::Ok()
-            .json("{
+    if user_gateway.delete(&path.0) {
+        HttpResponse::Ok().json(
+            r#"{
                 status: \"Ok\",
                 message: \"user is deleted\"
-            }"),
-        false => HttpResponse::Ok()
-            .json("{
+            }"#
+        )
+    } else {
+        HttpResponse::Ok().json(
+            r#"{
                 status: \"Error\",
                 message: \"user is not deleted\"
-            }"),
+            }"#
+        )
     }
 }
