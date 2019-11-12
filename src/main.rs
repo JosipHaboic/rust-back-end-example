@@ -3,7 +3,7 @@ use actix_web::{middleware, web, App, HttpServer};
 use env_logger;
 use listenfd::ListenFd;
 use log::info;
-use rusqlite::Connection;
+use rusqlite::{Connection};
 use std::include_str;
 
 mod core;
@@ -33,6 +33,7 @@ fn main() {
     connection
         .execute_batch(include_str!("./sql/user/__create__.sql"))
         .unwrap();
+
     connection.close().unwrap();
 
     let mut server = HttpServer::new(move || {
