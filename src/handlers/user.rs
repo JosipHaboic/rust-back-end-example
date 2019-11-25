@@ -4,17 +4,32 @@ use crate::core::traits::data_source::TableGateway;
 use crate::core::types::sqlite3::{Params, Value};
 use crate::gateways::user::UserTableGateway;
 use crate::inputs::user::UserInput;
+use crate::api::responses::error::ErrorResponse;
+use crate::api::responses::user::UsersResponse;
 use crate::store::state::AppState;
 use actix_web::{web, HttpResponse};
+use serde_json::json;
 use rs_uuid::uuid16;
 
-pub fn get_user_list(data: web::Data<AppState>) -> HttpResponse {
+
+pub fn get_user_list<'a>(data: web::Data<AppState>) -> HttpResponse {
     let connection = data.db.connection.lock().unwrap();
     let user_gateway = UserTableGateway::init(&connection);
 
-    match user_gateway.find_all() {
-        Some(users) => HttpResponse::Ok().json(users),
-        None => HttpResponse::Ok().json(()),
+    if let Some(users) = user_gateway.find(None) {
+        HttpResponse::Ok().json(UsersResponse {
+            status: 200,
+            message: &format!("{} items found", users.len()),
+            result: users
+        })
+    } else {
+        HttpResponse::Ok().json(
+            ErrorResponse
+            {
+                status: 400,
+                message: "Not found"
+            }
+        )
     }
 }
 
@@ -25,9 +40,18 @@ pub fn get_user(
     let connection = data.db.connection.lock().unwrap();
     let user_gateway = UserTableGateway::init(&connection);
 
-    match user_gateway.find(&path.0) {
-        Some(user) => HttpResponse::Ok().json(user),
-        None => HttpResponse::Ok().json(()),
+    match user_gateway.find(Some(&path.0)) {
+        Some(user) => HttpResponse::Ok().json(UsersResponse {
+            status: 200,
+            message: &format!("{} items found", 1),
+            result: user
+        }),
+        None => HttpResponse::Ok().json(ErrorResponse
+            {
+                status: 400,
+                message: "Not found"
+            }
+        )
     }
 }
 
@@ -44,17 +68,17 @@ pub fn create_user(
     p.insert("password".to_owned(), Value::Text(form.password.clone()));
 
     if user_gateway.insert(&p) {
-        HttpResponse::Ok().json(
-            r#"{
-                status: "Ok",
-                message: "user is inserted"
-            }"#)
+        HttpResponse::Ok().json(json!(
+            {
+                "status": 200,
+                "message": "User inserted"
+            }))
     } else {
-        HttpResponse::Ok().json(
-            r#"{
-                status: "Error",
-                message: "user is not inserted"
-            }"#,
+        HttpResponse::Ok().json(ErrorResponse
+            {
+                status: 400,
+                message: "User not inserted"
+            }
         )
     }
 }
@@ -73,18 +97,17 @@ pub fn update_user(
     p.insert("password".to_owned(), Value::Text(form.password.clone()));
 
     if user_gateway.update(&p) {
-        HttpResponse::Ok().json(
-            r#"{
-                status: "Ok",
-                message: "user is updated"
-            }"#
-        )
+        HttpResponse::Ok().json(json!(
+            {
+                "status": 200,
+                "message": "User updated"
+            }))
     } else {
-        HttpResponse::Ok().json(
-            r#"{
-                status: "Error",
-                message: "user is not updated"
-            }"#
+        HttpResponse::Ok().json(ErrorResponse
+            {
+                status: 400,
+                message: "User is not updated"
+            }
         )
     }
 }
@@ -97,18 +120,17 @@ pub fn delete_user(
     let user_gateway = UserTableGateway::init(&connection);
 
     if user_gateway.delete(&path.0) {
-        HttpResponse::Ok().json(
-            r#"{
-                status: "Ok",
-                message: "user is deleted"
-            }"#
-        )
+        HttpResponse::Ok().json(json!(
+            {
+                "status": 200,
+                "message": "User deleted"
+            }))
     } else {
-        HttpResponse::Ok().json(
-            r#"{
-                status: "Error",
-                message: "user is not deleted"
-            }"#
+        HttpResponse::Ok().json(ErrorResponse
+            {
+                status: 400,
+                message: "User was not deleted"
+            }
         )
     }
 }

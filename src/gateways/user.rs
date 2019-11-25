@@ -49,21 +49,50 @@ impl<'a> TableGateway<'a> for UserTableGateway<'a> {
             .is_ok()
     }
 
-    fn find(self: &Self, id: &str) -> Option<Self::Model> {
-        let mut sql_statement = self
-            .connection
-            .prepare(include_str!("../sql/user/find.sql"))
-            .unwrap();
-        match sql_statement.query_row(&[id], |row| {
-            Ok(User {
-                uuid: row.get(0).unwrap(),
-                username: row.get(1).unwrap(),
-                password: row.get(2).unwrap(),
-                inserted_at: Some(row.get(3).unwrap()),
-            })
-        }) {
-            Ok(user) => Some(user),
-            Err(_) => None,
+    fn find(self: &Self, id: Option<&str>) -> Option<Vec<Self::Model>> {
+        match id {
+            Some(uuid) => {
+                let mut sql_statement = self
+                    .connection
+                    .prepare(include_str!("../sql/user/find.sql"))
+                    .unwrap();
+                match sql_statement.query_row(&[uuid], |row| {
+                    Ok(User {
+                        uuid: row.get(0).unwrap(),
+                        username: row.get(1).unwrap(),
+                        password: row.get(2).unwrap(),
+                        inserted_at: Some(row.get(3).unwrap()),
+                    })
+                }) {
+                    Ok(user) => Some(vec![user]),
+                    Err(_) => None,
+                }
+            }
+            None => {
+                match self
+                    .connection
+                    .prepare(include_str!("../sql/user/find_all.sql"))
+                    .unwrap()
+                    .query_map(NO_PARAMS, |row| {
+                        Ok(User {
+                            uuid: row.get(0).unwrap(),
+                            username: row.get(1).unwrap(),
+                            password: row.get(2).unwrap(),
+                            inserted_at: Some(row.get(3).unwrap()),
+                        })
+                    }) {
+                    Ok(result) => {
+                        let mut users: Vec<User> = Vec::new();
+                        for i in result {
+                            if let Ok(user) = i {
+                                users.push(user)
+                            }
+                        }
+                        Some(users)
+                    }
+                    Err(_) => None,
+                }
+            }
         }
     }
 
@@ -84,37 +113,6 @@ impl<'a> TableGateway<'a> for UserTableGateway<'a> {
         self.connection
             .execute(include_str!("../sql/user/delete.sql"), &[id])
             .is_ok()
-    }
-}
-
-// this should be done in a different way, by making more smart "find" method
-impl<'a> UserTableGateway<'a> {
-    pub fn find_all(self: &Self) -> Option<Vec<User>> {
-        match self
-            .connection
-            .prepare(include_str!("../sql/user/find_all.sql"))
-            .unwrap()
-            .query_map(NO_PARAMS, |row| {
-                Ok(User {
-                    uuid: row.get(0).unwrap(),
-                    username: row.get(1).unwrap(),
-                    password: row.get(2).unwrap(),
-                    inserted_at: Some(row.get(3).unwrap()),
-                })
-            }) {
-            Ok(result) => {
-                let mut users: Vec<User> = Vec::new();
-
-                for i in result {
-                    if let Ok(user) = i {
-                        users.push(user)
-                    }
-                }
-
-                Some(users)
-            }
-            Err(_) => None,
-        }
     }
 }
 
@@ -142,17 +140,14 @@ mod tests {
 
         assert!(user_gateway.insert(&insert_params));
 
-        let users = user_gateway.find_all();
+        let users = user_gateway.find(None);
 
         if let Some(user_list) = users {
             assert_eq!(user_list.capacity(), 1);
-            let user = user_gateway.find(&user_list[0].uuid);
-
-            if let Some(usr) = user {
-                assert_eq!(usr.uuid, user_list[0].uuid);
-                assert_eq!(usr.username, user_list[0].username);
-                assert_eq!(usr.password, user_list[0].password);
-            }
+            let user = &user_gateway.find(Some(&user_list[0].uuid)).unwrap()[0];
+            assert_eq!(user.uuid, user_list[0].uuid);
+            assert_eq!(user.username, user_list[0].username);
+            assert_eq!(user.password, user_list[0].password);
         }
 
         assert!(connection

@@ -2,7 +2,7 @@
 use rs_uuid::uuid16;
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct User {
     pub uuid: String,
     pub username: String,

@@ -46,7 +46,7 @@ pub mod data_source {
 
         // CRUD operations
         fn insert(self: &Self, params: &Self::Params) -> bool;
-        fn find(self: &Self, id: &str) -> Option<Self::Model>;
+        fn find(self: &Self, id: Option<&str>) -> Option<Vec<Self::Model>>;
         fn update(self: &Self, params: &Self::Params) -> bool;
         fn delete(self: &Self, id: &str) -> bool;
     }

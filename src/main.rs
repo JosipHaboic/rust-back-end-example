@@ -3,7 +3,7 @@ use actix_web::{middleware, web, App, HttpServer};
 use env_logger;
 use listenfd::ListenFd;
 use log::info;
-use rusqlite::{Connection};
+use rusqlite::Connection;
 use std::include_str;
 
 mod core;
@@ -12,6 +12,7 @@ mod handlers;
 mod inputs;
 mod models;
 mod responders;
+mod api;
 mod store;
 mod utils;
 
@@ -26,7 +27,8 @@ fn main() {
     println!("Starting application on: http://{}:{}", ADDRESS, PORT);
     info!(
         "[server] starting application server at: http://{}:{}",
-        ADDRESS, PORT
+        ADDRESS,
+        PORT
     );
 
     let connection = Connection::open("./database.db").unwrap();
@@ -41,28 +43,32 @@ fn main() {
         App::new()
             // enable logger
             .wrap(middleware::Logger::default())
-            .register_data(
-                web::Data::new(store::state::AppState::new(API_VERSION))
-            ).service(
+            .wrap(middleware::Compress::default())
+            .register_data(web::Data::new(store::state::AppState::new(
+                API_VERSION,
+            )))
+            .service(
                 web::scope(&format!("api/v{}", API_VERSION))
-                .service(
-                    web::resource("/users")
-                        .name("users")
-                        .route(web::get().to(handlers::user::get_user_list))
-                        .route(web::post().to(handlers::user::create_user)),
-                )
-                .service(
-                    web::resource("/users/{id}")
-                        .name("user")
-                        .route(web::get().to(handlers::user::get_user))
-                        .route(web::put().to(handlers::user::update_user))
-                        .route(web::delete().to(handlers::user::delete_user)),
-                )
-
+                    .service(
+                        web::resource("/users/")
+                            .name("users")
+                            .route(web::get().to(handlers::user::get_user_list))
+                            .route(web::post().to(handlers::user::create_user)),
+                    )
+                    .service(
+                        web::resource("/users/{id}")
+                            .name("user")
+                            .route(web::get().to(handlers::user::get_user))
+                            .route(web::put().to(handlers::user::update_user))
+                            .route(
+                                web::delete().to(handlers::user::delete_user),
+                            ),
+                    ),
             )
             .service(
                 // static files
-                fs::Files::new("/", "./static/").index_file("index.html"),
+                fs::Files::new("/", "../front-end/build")
+                    .index_file("index.html"),
             )
     });
 
