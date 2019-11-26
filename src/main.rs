@@ -9,12 +9,12 @@ use std::include_str;
 mod api;
 mod core;
 mod gateways;
-mod transaction_scripts;
 mod handlers;
 mod inputs;
 mod models;
 mod responders;
 mod store;
+mod transaction_scripts;
 mod utils;
 
 fn main() {

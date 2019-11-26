@@ -11,7 +11,7 @@ use actix_web::{web, HttpResponse};
 use rs_uuid::uuid16;
 use serde_json::json;
 
-pub fn get_user_list<'a>(data: web::Data<AppState>) -> HttpResponse {
+pub fn get_user_list(data: web::Data<AppState>) -> HttpResponse {
     let connection = data.db.connection.lock().unwrap();
     let user_gateway = UserTableGateway::init(&connection);
 
