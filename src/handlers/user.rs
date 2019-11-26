@@ -1,16 +1,15 @@
 #![allow(dead_code)]
+use crate::api::responses::error::ErrorResponse;
+use crate::api::responses::user::UsersResponse;
 use crate::core::traits::base::Gateway;
 use crate::core::traits::data_source::TableGateway;
 use crate::core::types::sqlite3::{Params, Value};
 use crate::gateways::user::UserTableGateway;
 use crate::inputs::user::UserInput;
-use crate::api::responses::error::ErrorResponse;
-use crate::api::responses::user::UsersResponse;
 use crate::store::state::AppState;
 use actix_web::{web, HttpResponse};
-use serde_json::json;
 use rs_uuid::uuid16;
-
+use serde_json::json;
 
 pub fn get_user_list<'a>(data: web::Data<AppState>) -> HttpResponse {
     let connection = data.db.connection.lock().unwrap();
@@ -20,16 +19,13 @@ pub fn get_user_list<'a>(data: web::Data<AppState>) -> HttpResponse {
         HttpResponse::Ok().json(UsersResponse {
             status: 200,
             message: &format!("{} items found", users.len()),
-            result: users
+            result: users,
         })
     } else {
-        HttpResponse::Ok().json(
-            ErrorResponse
-            {
-                status: 400,
-                message: "Not found"
-            }
-        )
+        HttpResponse::Ok().json(ErrorResponse {
+            status: 400,
+            message: "Not found",
+        })
     }
 }
 
@@ -44,14 +40,12 @@ pub fn get_user(
         Some(user) => HttpResponse::Ok().json(UsersResponse {
             status: 200,
             message: &format!("{} items found", 1),
-            result: user
+            result: user,
         }),
-        None => HttpResponse::Ok().json(ErrorResponse
-            {
-                status: 400,
-                message: "Not found"
-            }
-        )
+        None => HttpResponse::Ok().json(ErrorResponse {
+            status: 400,
+            message: "Not found",
+        }),
     }
 }
 
@@ -69,17 +63,15 @@ pub fn create_user(
 
     if user_gateway.insert(&p) {
         HttpResponse::Ok().json(json!(
-            {
-                "status": 200,
-                "message": "User inserted"
-            }))
+        {
+            "status": 200,
+            "message": "User inserted"
+        }))
     } else {
-        HttpResponse::Ok().json(ErrorResponse
-            {
-                status: 400,
-                message: "User not inserted"
-            }
-        )
+        HttpResponse::Ok().json(ErrorResponse {
+            status: 400,
+            message: "User not inserted",
+        })
     }
 }
 
@@ -98,17 +90,15 @@ pub fn update_user(
 
     if user_gateway.update(&p) {
         HttpResponse::Ok().json(json!(
-            {
-                "status": 200,
-                "message": "User updated"
-            }))
+        {
+            "status": 200,
+            "message": "User updated"
+        }))
     } else {
-        HttpResponse::Ok().json(ErrorResponse
-            {
-                status: 400,
-                message: "User is not updated"
-            }
-        )
+        HttpResponse::Ok().json(ErrorResponse {
+            status: 400,
+            message: "User is not updated",
+        })
     }
 }
 
@@ -121,16 +111,14 @@ pub fn delete_user(
 
     if user_gateway.delete(&path.0) {
         HttpResponse::Ok().json(json!(
-            {
-                "status": 200,
-                "message": "User deleted"
-            }))
+        {
+            "status": 200,
+            "message": "User deleted"
+        }))
     } else {
-        HttpResponse::Ok().json(ErrorResponse
-            {
-                status: 400,
-                message: "User was not deleted"
-            }
-        )
+        HttpResponse::Ok().json(ErrorResponse {
+            status: 400,
+            message: "User was not deleted",
+        })
     }
 }

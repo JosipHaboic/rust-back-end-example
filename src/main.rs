@@ -6,13 +6,14 @@ use log::info;
 use rusqlite::Connection;
 use std::include_str;
 
+mod api;
 mod core;
 mod gateways;
+mod transaction_scripts;
 mod handlers;
 mod inputs;
 mod models;
 mod responders;
-mod api;
 mod store;
 mod utils;
 
@@ -27,8 +28,7 @@ fn main() {
     println!("Starting application on: http://{}:{}", ADDRESS, PORT);
     info!(
         "[server] starting application server at: http://{}:{}",
-        ADDRESS,
-        PORT
+        ADDRESS, PORT
     );
 
     let connection = Connection::open("./database.db").unwrap();

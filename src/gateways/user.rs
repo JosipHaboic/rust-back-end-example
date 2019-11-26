@@ -149,9 +149,5 @@ mod tests {
             assert_eq!(user.username, user_list[0].username);
             assert_eq!(user.password, user_list[0].password);
         }
-
-        assert!(connection
-            .execute_batch(include_str!("../sql/user/__delete__.sql"))
-            .is_ok());
     }
 }

@@ -17,7 +17,14 @@ pub mod domain_logic {
     /// Organizes business logic by procedures where each procedure handles a
     /// single request from the presentation.
     pub trait TransactionScript {
-        fn execute(self: &Self) -> bool;
+        type Output;
+        type Connection;
+        type Params;
+        fn execute(
+            self: &Self,
+            connection: &Self::Connection,
+            params: &Self::Params,
+        ) -> Self::Output;
     }
 }
 
