@@ -1,6 +1,7 @@
 use crate::models::User;
 use actix_web::{Error, HttpRequest, HttpResponse, Responder};
 
+// not in use - just an example
 impl Responder for User {
     type Error = Error;
     type Future = Result<HttpResponse, Error>;
