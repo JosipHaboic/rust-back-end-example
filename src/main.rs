@@ -44,9 +44,7 @@ fn main() {
             // enable logger
             .wrap(middleware::Logger::default())
             .wrap(middleware::Compress::default())
-            .register_data(web::Data::new(store::state::AppState::new(
-                API_VERSION,
-            )))
+            .register_data(web::Data::new(store::state::AppState::new(API_VERSION)))
             .service(
                 web::scope(&format!("api/v{}", API_VERSION))
                     .service(
@@ -60,15 +58,12 @@ fn main() {
                             .name("user")
                             .route(web::get().to(handlers::user::get_user))
                             .route(web::put().to(handlers::user::update_user))
-                            .route(
-                                web::delete().to(handlers::user::delete_user),
-                            ),
+                            .route(web::delete().to(handlers::user::delete_user)),
                     ),
             )
             .service(
                 // static files
-                fs::Files::new("/", "../front-end/build")
-                    .index_file("index.html"),
+                fs::Files::new("/", "../front-end/build").index_file("index.html"),
             )
     });
 

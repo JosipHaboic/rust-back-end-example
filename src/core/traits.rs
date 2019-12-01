@@ -50,11 +50,12 @@ pub mod data_source {
     pub trait TableGateway<'a>: Gateway<'a> {
         type Model;
         type Params;
+        type Error;
 
         // CRUD operations
-        fn insert(self: &Self, params: &Self::Params) -> bool;
-        fn find(self: &Self, id: Option<&str>) -> Option<Vec<Self::Model>>;
-        fn update(self: &Self, params: &Self::Params) -> bool;
-        fn delete(self: &Self, id: &str) -> bool;
+        fn insert(self: &Self, params: &Self::Params) -> Result<(), Self::Error>;
+        fn find(self: &Self, id: Option<&str>) -> Result<Vec<Self::Model>, Self::Error>;
+        fn update(self: &Self, params: &Self::Params) -> Result<(), Self::Error>;
+        fn delete(self: &Self, id: &str) -> Result<(), Self::Error>;
     }
 }

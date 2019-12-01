@@ -10,12 +10,14 @@ use crate::store::state::AppState;
 use actix_web::{web, HttpResponse};
 use rs_uuid::uuid16;
 use serde_json::json;
+use std::error::Error;
+
 
 pub fn get_user_list(data: web::Data<AppState>) -> HttpResponse {
     let connection = data.db.connection.lock().unwrap();
     let user_gateway = UserTableGateway::init(&connection);
 
-    if let Some(users) = user_gateway.find(None) {
+    if let Ok(users) = user_gateway.find(None) {
         HttpResponse::Ok().json(UsersResponse {
             status: 200,
             message: &format!("{} items found", users.len()),
@@ -37,14 +39,14 @@ pub fn get_user(
     let user_gateway = UserTableGateway::init(&connection);
 
     match user_gateway.find(Some(&path.0)) {
-        Some(user) => HttpResponse::Ok().json(UsersResponse {
+        Ok(user) => HttpResponse::Ok().json(UsersResponse {
             status: 200,
             message: &format!("{} items found", 1),
             result: user,
         }),
-        None => HttpResponse::Ok().json(ErrorResponse {
+        Err(error) => HttpResponse::Ok().json(ErrorResponse {
             status: 400,
-            message: "Not found",
+            message: error.description(),
         }),
     }
 }
@@ -61,17 +63,25 @@ pub fn create_user(
     p.insert("username".to_owned(), Value::Text(form.username.clone()));
     p.insert("password".to_owned(), Value::Text(form.password.clone()));
 
-    if user_gateway.insert(&p) {
-        HttpResponse::Ok().json(json!(
-        {
-            "status": 200,
-            "message": "User inserted"
-        }))
-    } else {
-        HttpResponse::Ok().json(ErrorResponse {
-            status: 400,
-            message: "User not inserted",
-        })
+    match user_gateway.insert(&p) {
+        Ok(_) => {
+            HttpResponse::Ok().json(
+                json!(
+                {
+                    "status": 200,
+                    "message": "User inserted"
+                }
+            ))
+        },
+        Err(error) => {
+            HttpResponse::Ok().json(
+                ErrorResponse
+                {
+                    status: 400,
+                    message: error.description(),
+                }
+            )
+        }
     }
 }
 
@@ -88,17 +98,19 @@ pub fn update_user(
     p.insert("username".to_owned(), Value::Text(form.username.clone()));
     p.insert("password".to_owned(), Value::Text(form.password.clone()));
 
-    if user_gateway.update(&p) {
-        HttpResponse::Ok().json(json!(
-        {
-            "status": 200,
-            "message": "User updated"
-        }))
-    } else {
-        HttpResponse::Ok().json(ErrorResponse {
+    match user_gateway.update(&p) {
+        Ok(_) => {
+            HttpResponse::Ok().json(json!(
+            {
+                "status": 200,
+                "message": "User updated"
+            }))
+        },
+        Err(error) => {
+            HttpResponse::Ok().json(ErrorResponse {
             status: 400,
-            message: "User is not updated",
-        })
+            message: error.description(),
+        })}
     }
 }
 
@@ -109,16 +121,21 @@ pub fn delete_user(
     let connection = data.db.connection.lock().unwrap();
     let user_gateway = UserTableGateway::init(&connection);
 
-    if user_gateway.delete(&path.0) {
-        HttpResponse::Ok().json(json!(
-        {
-            "status": 200,
-            "message": "User deleted"
-        }))
-    } else {
-        HttpResponse::Ok().json(ErrorResponse {
-            status: 400,
-            message: "User was not deleted",
-        })
+    match user_gateway.delete(&path.0) {
+        Ok(_) => {
+            HttpResponse::Ok().json(json!(
+            {
+                "status": 200,
+                "message": "User deleted"
+            }))
+        },
+        Err(error) => {
+            HttpResponse::Ok().json(
+                ErrorResponse {
+                    status: 400,
+                    message: error.description(),
+                }
+            )
+        }
     }
 }
