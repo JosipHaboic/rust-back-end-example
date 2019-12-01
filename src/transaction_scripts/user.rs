@@ -11,9 +11,7 @@ pub struct FindByField<'a> {
 
 impl<'a> FindByField<'a> {
     pub fn new(field: &'a str) -> Self {
-        FindByField {
-            field,
-        }
+        FindByField { field }
     }
 }
 
@@ -31,14 +29,16 @@ impl<'a> TransactionScript for FindByField<'a> {
             .prepare(&format!("SELECT * FROM users WHERE {} = ?1", self.field))
             .unwrap();
 
-        let rows = statement.query_map(&[params.get("username")], |row| {
-            Ok(User {
-                uuid: row.get(0).unwrap(),
-                username: row.get(1).unwrap(),
-                password: row.get(2).unwrap(),
-                inserted_at: row.get(3).unwrap(),
+        let rows = statement
+            .query_map(&[params.get("username")], |row| {
+                Ok(User {
+                    uuid: row.get(0).unwrap(),
+                    username: row.get(1).unwrap(),
+                    password: row.get(2).unwrap(),
+                    inserted_at: row.get(3).unwrap(),
+                })
             })
-        }).unwrap();
+            .unwrap();
 
         rows.collect()
     }

@@ -4,7 +4,7 @@ use crate::core::traits::data_source::TableGateway;
 use crate::core::traits::object_relational::structural::IdentityField;
 use crate::core::types::sqlite3::Params;
 use crate::models::User;
-use rusqlite::{Connection, NO_PARAMS, Error as DBError};
+use rusqlite::{Connection, Error as DBError, NO_PARAMS};
 use std::include_str;
 
 /// implement layer super-type marker trait
@@ -41,14 +41,13 @@ impl<'a> TableGateway<'a> for UserTableGateway<'a> {
             .prepare(include_str!("../sql/user/insert.sql"))
             .unwrap();
 
-        match sql_statement
-            .execute(&[
-                params.get("uuid").unwrap(),
-                params.get("username").unwrap(),
-                params.get("password").unwrap(),
+        match sql_statement.execute(&[
+            params.get("uuid").unwrap(),
+            params.get("username").unwrap(),
+            params.get("password").unwrap(),
         ]) {
-           Ok(_) => Ok(()),
-           Err(error) => Err(error)
+            Ok(_) => Ok(()),
+            Err(error) => Err(error),
         }
     }
 
@@ -92,7 +91,7 @@ impl<'a> TableGateway<'a> for UserTableGateway<'a> {
                             }
                         }
                         Ok(users)
-                    },
+                    }
                     Err(error) => Err(error),
                 }
             }
@@ -109,14 +108,17 @@ impl<'a> TableGateway<'a> for UserTableGateway<'a> {
             ],
         ) {
             Ok(_) => Ok(()),
-            Err(error) => Err(error)
+            Err(error) => Err(error),
         }
     }
 
     fn delete(self: &Self, id: &str) -> Result<(), Self::Error> {
-        match self.connection.execute(include_str!("../sql/user/delete.sql"), &[id]) {
+        match self
+            .connection
+            .execute(include_str!("../sql/user/delete.sql"), &[id])
+        {
             Ok(_) => Ok(()),
-            Err(error) => Err(error)
+            Err(error) => Err(error),
         }
     }
 }

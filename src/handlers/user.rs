@@ -12,7 +12,6 @@ use rs_uuid::uuid16;
 use serde_json::json;
 use std::error::Error;
 
-
 pub fn get_user_list(data: web::Data<AppState>) -> HttpResponse {
     let connection = data.db.connection.lock().unwrap();
     let user_gateway = UserTableGateway::init(&connection);
@@ -64,24 +63,16 @@ pub fn create_user(
     p.insert("password".to_owned(), Value::Text(form.password.clone()));
 
     match user_gateway.insert(&p) {
-        Ok(_) => {
-            HttpResponse::Ok().json(
-                json!(
-                {
-                    "status": 200,
-                    "message": "User inserted"
-                }
-            ))
-        },
-        Err(error) => {
-            HttpResponse::Ok().json(
-                ErrorResponse
-                {
-                    status: 400,
-                    message: error.description(),
-                }
-            )
-        }
+        Ok(_) => HttpResponse::Ok().json(json!(
+            {
+                "status": 200,
+                "message": "User inserted"
+            }
+        )),
+        Err(error) => HttpResponse::Ok().json(ErrorResponse {
+            status: 400,
+            message: error.description(),
+        }),
     }
 }
 
@@ -99,18 +90,15 @@ pub fn update_user(
     p.insert("password".to_owned(), Value::Text(form.password.clone()));
 
     match user_gateway.update(&p) {
-        Ok(_) => {
-            HttpResponse::Ok().json(json!(
-            {
-                "status": 200,
-                "message": "User updated"
-            }))
-        },
-        Err(error) => {
-            HttpResponse::Ok().json(ErrorResponse {
+        Ok(_) => HttpResponse::Ok().json(json!(
+        {
+            "status": 200,
+            "message": "User updated"
+        })),
+        Err(error) => HttpResponse::Ok().json(ErrorResponse {
             status: 400,
             message: error.description(),
-        })}
+        }),
     }
 }
 
@@ -122,20 +110,14 @@ pub fn delete_user(
     let user_gateway = UserTableGateway::init(&connection);
 
     match user_gateway.delete(&path.0) {
-        Ok(_) => {
-            HttpResponse::Ok().json(json!(
-            {
-                "status": 200,
-                "message": "User deleted"
-            }))
-        },
-        Err(error) => {
-            HttpResponse::Ok().json(
-                ErrorResponse {
-                    status: 400,
-                    message: error.description(),
-                }
-            )
-        }
+        Ok(_) => HttpResponse::Ok().json(json!(
+        {
+            "status": 200,
+            "message": "User deleted"
+        })),
+        Err(error) => HttpResponse::Ok().json(ErrorResponse {
+            status: 400,
+            message: error.description(),
+        }),
     }
 }
