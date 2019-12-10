@@ -54,6 +54,7 @@ pub mod data_source {
 
         // CRUD operations
         fn insert(self: &Self, params: &Self::Params) -> Result<(), Self::Error>;
+        // find by id or return "all" if id is not provided
         fn find(
             self: &Self,
             id: Option<&str>,
