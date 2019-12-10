@@ -63,36 +63,19 @@ fn test_find_by_field() {
 		);
 
 		INSERT INTO users (uuid, username, password)
-		VALUES ('98ds-9s8ds9d-98ds-9d98s', 'Josip', '0d9s0d909ds');
-	",
+        VALUES ('98ds-9s8ds9d-98ds-9d98s', 'Josip', '0d9s0d909ds');
+    ",
         )
         .unwrap();
 
     let find_user_by_username = FindByField::new("username");
+
     let mut search_params = Params::new();
     search_params.insert("username".to_owned(), Value::Text("Josip".to_owned()));
 
     if let Ok(users) = find_user_by_username.execute(&connection, &search_params) {
         assert_eq!(users.len(), 1);
         assert_eq!(users[0].username, "Josip".to_owned());
-    } else {
-        assert!(false);
-    }
-
-    let find_user_by_id = FindByField::new("uuid");
-    search_params = Params::new();
-    search_params.insert(
-        "uuid".to_owned(),
-        Value::Text("98ds-9s8ds9d-98ds-9d98s".to_owned()),
-    );
-
-    if let Ok(users) = find_user_by_id.execute(&connection, &search_params) {
-        assert_eq!(users.len(), 1);
-        assert_eq!(
-            users[0].uuid,
-            "98ds-9s8ds9d-98ds-9d98s".to_owned(),
-            "Did not find the uuid"
-        );
     } else {
         assert!(false);
     }
