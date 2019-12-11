@@ -1,0 +1,14 @@
+:root {
+	--dark: #222222;
+	--light: #dadada;
+}
+
+* {
+	box-sizing: border-box;
+	padding: 0;
+	color: var(--light);
+}
+
+body {
+	background: var(--dark);
+}
