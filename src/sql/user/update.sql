@@ -1,5 +1,5 @@
 BEGIN TRANSACTION;
 
-UPDATE users SET username = ?1, password = ?2 WHERE uuid = ?3;
+UPDATE users SET username = ?3, password = ?2 WHERE uuid = ?1;
 
 COMMIT;
