@@ -62,8 +62,6 @@ fn main() {
                     ),
             )
             .service(
-                // static files
-                // fs::Files::new("/", "../front-end/build").index_file("index.html"),
                 fs::Files::new("/", "./src/front-end/temp").index_file("index.html"),
             )
     });

@@ -1,5 +1,6 @@
-use crate::models::User;
 use actix_web::{Error, HttpRequest, HttpResponse, Responder};
+// use futures::future::{Future};
+use crate::models::User;
 
 // not in use - just an example
 impl Responder for User {
