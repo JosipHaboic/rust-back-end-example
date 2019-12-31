@@ -12,12 +12,13 @@ mod gateways;
 mod handlers;
 mod inputs;
 mod models;
-mod responders;
+// mod responders;
 mod store;
 mod transaction_scripts;
 mod utils;
 
-fn main() {
+#[actix_rt::main]
+async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
 
@@ -44,7 +45,8 @@ fn main() {
             // enable logger
             .wrap(middleware::Logger::default())
             .wrap(middleware::Compress::default())
-            .register_data(web::Data::new(store::state::AppState::new(API_VERSION)))
+            // .app_data(web::Data::new(store::state::AppState::new(API_VERSION)))
+            .app_data(web::Data::new(store::state::AppState::new(API_VERSION)))
             .service(
                 web::scope(&format!("api/v{}", API_VERSION))
                     .service(
@@ -62,7 +64,8 @@ fn main() {
                     ),
             )
             .service(
-                fs::Files::new("/", "./src/front-end/temp").index_file("index.html"),
+                fs::Files::new("/", "../front-end-react/build")
+                    .index_file("index.html"),
             )
     });
 
@@ -74,5 +77,5 @@ fn main() {
         server.bind(format!("{}:{}", ADDRESS, PORT)).unwrap()
     };
 
-    server.run().unwrap()
+    server.run().await
 }
