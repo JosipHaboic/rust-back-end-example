@@ -1,1 +1,1 @@
-SELECT * FROM users WHERE uuid = ?1;
+SELECT * FROM users WHERE uuid = ?1 ORDER BY username;
