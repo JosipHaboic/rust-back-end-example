@@ -1,18 +1,22 @@
 use actix_web::{Error, HttpRequest, HttpResponse, Responder};
-// use futures::future::{Future};
+use futures::future::{ready, Ready};
 use crate::models::User;
 
 // not in use - just an example
 impl Responder for User {
     type Error = Error;
-    type Future = Result<HttpResponse, Error>;
+    type Future = Ready<Result<HttpResponse, Error>>;
 
     fn respond_to(self: Self, _req: &HttpRequest) -> Self::Future {
-        let body = serde_json::to_string(&self)?;
+        let body = serde_json::to_string(&self).unwrap();
 
         // Create response and set content type
-        Ok(HttpResponse::Ok()
-            .content_type("application/json")
-            .body(body))
+        ready(
+            Ok(
+                HttpResponse::Ok()
+                    .content_type("application/json")
+                    .body(body)
+            )
+        )
     }
 }
