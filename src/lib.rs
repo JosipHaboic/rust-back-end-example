@@ -5,6 +5,7 @@ pub mod handlers;
 pub mod inputs;
 pub mod models;
 // pub mod responders;
+pub mod config;
 pub mod store;
 pub mod transaction_scripts;
 pub mod utils;
