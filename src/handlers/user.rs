@@ -121,3 +121,5 @@ pub fn delete_user(
         }),
     }
 }
+
+// !TODO: Do the test for the handlers: https://actix.rs/docs/testing/
