@@ -45,7 +45,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             // enable logger
             .wrap(middleware::Logger::default())
-            .wrap(Logger::new("%a %{User-Agent}i"))
+            .wrap(middleware::Logger::new("%a %{User-Agent}i"))
             .wrap(middleware::Compress::default())
             .wrap(Cors::default())
             // .app_data(web::Data::new(store::state::AppState::new(API_VERSION)))
