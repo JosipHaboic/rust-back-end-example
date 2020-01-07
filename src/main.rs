@@ -1,6 +1,6 @@
 use actix_files as fs;
 use actix_web::{middleware, web, App, HttpServer};
-use actix_cors::{Cors};
+use actix_cors::Cors;
 use env_logger;
 use listenfd::ListenFd;
 use log::info;
@@ -45,6 +45,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             // enable logger
             .wrap(middleware::Logger::default())
+            .wrap(Logger::new("%a %{User-Agent}i"))
             .wrap(middleware::Compress::default())
             .wrap(Cors::default())
             // .app_data(web::Data::new(store::state::AppState::new(API_VERSION)))
