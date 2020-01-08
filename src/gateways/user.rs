@@ -134,7 +134,7 @@ mod tests {
 
         let mut insert_params = Params::new();
 
-        let user = User::new("Yossi".to_owned(), "test-password".to_owned());
+        let user = User::new("Name".to_owned(), "test-password".to_owned());
 
         insert_params.insert("username".to_owned(), Value::Text(user.username));
         insert_params.insert("password".to_owned(), Value::Text(user.password));
@@ -154,7 +154,7 @@ mod tests {
 
         let mut insert_params = Params::new();
 
-        let user = User::new("Yossi".to_owned(), "test-password".to_owned());
+        let user = User::new("Name".to_owned(), "test-password".to_owned());
 
         insert_params.insert("username".to_owned(), Value::Text(user.username));
         insert_params.insert("password".to_owned(), Value::Text(user.password));
