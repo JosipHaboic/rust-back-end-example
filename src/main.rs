@@ -13,7 +13,7 @@ mod gateways;
 mod handlers;
 mod inputs;
 mod models;
-// mod responders;
+mod responders;
 mod store;
 mod transaction_scripts;
 mod utils;
@@ -23,14 +23,14 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
 
-    const ADDRESS: &str = "127.0.0.1";
-    const PORT: u16 = 8080;
-    const API_VERSION: u8 = 1;
+    let address: &str = "127.0.0.1";
+    let port: &'static str = option_env!("port").unwrap_or("8080");
+    let api_version: u8 = 1;
 
-    println!("Starting application on: http://{}:{}", ADDRESS, PORT);
+    println!("Starting application on: http://{}:{}", address, port);
     info!(
         "[server] starting application server at: http://{}:{}",
-        ADDRESS, PORT
+        address, port
     );
 
     let connection = Connection::open("./database.db").unwrap();
@@ -48,10 +48,10 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::new("%a %{User-Agent}i"))
             .wrap(middleware::Compress::default())
             .wrap(Cors::default())
-            // .app_data(web::Data::new(store::state::AppState::new(API_VERSION)))
-            .app_data(web::Data::new(store::state::AppState::new(API_VERSION)))
+            // .app_data(web::Data::new(store::state::AppState::new(api_version)))
+            .app_data(web::Data::new(store::state::AppState::new(api_version)))
             .service(
-                web::scope(&format!("api/v{}", API_VERSION))
+                web::scope(&format!("api/v{}", api_version))
                     .service(
                         web::resource("/users/")
                             .name("users")
@@ -77,7 +77,7 @@ async fn main() -> std::io::Result<()> {
     server = if let Some(listener) = listenfd.take_tcp_listener(0).unwrap() {
         server.listen(listener).unwrap()
     } else {
-        server.bind(format!("{}:{}", ADDRESS, PORT)).unwrap()
+        server.bind(format!("{}:{}", address, port)).unwrap()
     };
 
     server.run().await
